@@ -17,7 +17,7 @@ class Listing(object):
     if r.status_code==200:
       pq=PyQuery(r.text)
       self.hiddenfields=pq("form:eq(1) input").val()
-      self.max=self.hiddenfields.split("|")[1]
+      self.max=int(self.hiddenfields.split("|")[1])
       return (self.hiddenfields,self.max)
     else:
       return None
