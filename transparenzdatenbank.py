@@ -3,6 +3,7 @@ import requests
 from pyquery import PyQuery
 import re
 from pygeocoder import Geocoder,GeocoderError
+import codecs
 
 class Listing(object):
   
@@ -43,8 +44,8 @@ class Listing(object):
 
   def save_csv(self,filename):
     pages=self.get_all_listings()
-    f=open(filename,"w")
-    f.write("%s/n"%",".join(pages[0].order))
+    f=codecs.open(filename,"w","utf-8")
+    f.write("%s\n"%",".join(pages[0].order))
     for page in pages:
       f.write(page.csv())
     f.close()  
