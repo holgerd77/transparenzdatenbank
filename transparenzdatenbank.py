@@ -40,7 +40,7 @@ class Listing(object):
       map(lambda x: self.get_listing(x),range(1,self.max+1)))
 
   def save_csv(self,filename):
-    pages=get_all_listings()
+    pages=self.get_all_listings()
     f=open(filename,"w")
     f.write("%s/n"%",".join(pages[0].order))
     for page in pages:
