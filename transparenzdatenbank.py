@@ -93,8 +93,12 @@ class Page(object):
 
   def get_records(self):
     m=re.match("(.*?),([^,]+)$",self.params["location"])
-    name=m.group(1)
-    ort=m.group(2)
+    if m:
+      name=m.group(1)
+      ort=m.group(2)
+    else:
+      name=self.params["location"]
+      ort=name
     name.strip()
     ort.lstrip()
     geo=self.get_geocode()
