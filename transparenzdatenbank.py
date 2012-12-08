@@ -80,10 +80,11 @@ class Page(object):
  
   def get_geocode(self,location,ort):
     try:
-      geo=Geocoder.geocode(location)
+      geo=Geocoder.geocode(location.encode("utf-8"))
     except GeocoderError:
       try:
-        geo=Geocoder.geocode("%s, Austria"%ort)
+        ort=u"%s, Austria"%ort
+        geo=Geocoder.geocode(ort.encode("utf-8"))
       except GeocoderError:
         return None
     
