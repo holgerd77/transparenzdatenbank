@@ -99,7 +99,7 @@ class Page(object):
     ort.lstrip()
     geo=self.get_geocode()
     if geo:
-      (lat,lon)=self.get_geocode()
+      (lat,lon)=geo
     else:
       (lat,lon)=(None,None)
     year=int(re.sub("[^0-9]","",self.params["year"]))
