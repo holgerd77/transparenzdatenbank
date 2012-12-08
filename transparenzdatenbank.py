@@ -78,13 +78,12 @@ class Page(object):
     items=[extract_items(row) for row in rows]
     return items
  
-  def get_geocode(self):
-    location=self.params["location"].encode("utf-8")
+  def get_geocode(self,location,ort):
     try:
       geo=Geocoder.geocode(location)
     except GeocoderError:
       try:
-        geo=Geocoder.geocode("%s, Austria"%location.split(",")[1])
+        geo=Geocoder.geocode("%s, Austria"%ort)
       except GeocoderError:
         return None
     
@@ -101,7 +100,7 @@ class Page(object):
       ort=name
     name.strip()
     ort.lstrip()
-    geo=self.get_geocode()
+    geo=self.get_geocode(self.params["location"],ort)
     if geo:
       (lat,lon)=geo
     else:
