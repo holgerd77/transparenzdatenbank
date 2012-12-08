@@ -106,7 +106,7 @@ class Page(object):
     unique=self.params["unique"]
 
     def construct_record(item):
-      return dict(item.items()+[("name",name.decode("utf-8")),("ort",ort.decode("utf-8")),("lat",lat),
+      return dict(item.items()+[("name",name),("ort",ort),("lat",lat),
       ("lon",lon),("year",year),("unique",unique),("ukey",u"%s-%s"%(unique,item["program"]))])
 
     return [construct_record(i) for i in self.get_items()] 
