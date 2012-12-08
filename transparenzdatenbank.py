@@ -36,6 +36,8 @@ class Listing(object):
     return pages
 
   def get_all_listings(self):
+    if not self.hiddenfields:
+      self.get_hiddenfields()
     return reduce(lambda x,y: x+y, 
       map(lambda x: self.get_listing(x),range(1,self.max+1)))
 
