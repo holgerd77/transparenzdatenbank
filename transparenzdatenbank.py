@@ -2,8 +2,8 @@
 import requests
 from pyquery import PyQuery
 import re
-from pygeocoder import Geocoder,GeocoderError
 import codecs
+import unicodecsv
 
 class Listing(object):
   
@@ -22,7 +22,7 @@ class Listing(object):
       return (self.hiddenfields,self.max)
     else:
       return None
-  
+
   def get_listing(self,number):
     if not self.hiddenfields:
       self.get_hiddenfields()
@@ -44,14 +44,15 @@ class Listing(object):
 
   def save_csv(self,filename):
     pages=self.get_all_listings()
-    f=codecs.open(filename,"w","utf-8")
-    f.write("%s\n"%",".join(pages[0].order))
+    f=open(filename,"w")
+    w = unicodecsv.writer(f, encoding='utf-8')
+    w.writerow(pages[0].order)
     for page in pages:
-      f.write(page.csv())
+      page.write_csv(w)
     f.close()  
     
 class Page(object):
-  order=["unique","ukey","name","ort","lat","lon","program","amount","year"]
+  order=["unique","ukey","name","ort","program","amount","year"]
   
   def __init__(self,url="http://www.transparenzdatenbank.at/trans/",params=None):
     self.url="%sshow.detail"%url
@@ -59,6 +60,11 @@ class Page(object):
     
   def get_html(self):
     r=requests.post(self.url,data=self.params)
+    if 'utf-8' in r.text.lower():
+        print 'utf-8 found in r.text! for params: %s' % self.params
+    if 'utf8' in r.text.lower():
+        print 'utf8 found in r.text! for params: %s' % self.params
+    r.encoding = 'iso-8859-1' # set manually in meta tag
     if r.status_code==200:
       self.html=r.text
       return self.html
@@ -78,18 +84,6 @@ class Page(object):
     items=[extract_items(row) for row in rows]
     return items
  
-  def get_geocode(self,location,ort):
-    try:
-      geo=Geocoder.geocode(location.encode("utf-8"))
-    except GeocoderError:
-      try:
-        ort=u"%s, Austria"%ort
-        geo=Geocoder.geocode(ort.encode("utf-8"))
-      except GeocoderError:
-        return None
-    
-    return geo.coordinates
-    
 
   def get_records(self):
     m=re.match("(.*?),([^,]+)$",self.params["location"])
@@ -101,22 +95,18 @@ class Page(object):
       ort=name
     name.strip()
     ort.lstrip()
-    geo=self.get_geocode(self.params["location"],ort)
-    if geo:
-      (lat,lon)=geo
-    else:
-      (lat,lon)=(None,None)
     year=int(re.sub("[^0-9]","",self.params["year"]))
     unique=self.params["unique"]
 
     def construct_record(item):
-      return dict(item.items()+[("name",name),("ort",ort),("lat",lat),
-      ("lon",lon),("year",year),("unique",unique),("ukey",u"%s-%s"%(unique,item["program"]))])
+      return dict(item.items()+[("name",name),("ort",ort.strip()),("year",year),("unique",unique),("ukey",u"%s-%s"%(unique,item["program"]))])
 
     return [construct_record(i) for i in self.get_items()] 
   
-  def csv(self):
+  def write_csv(self, w):
     def line(r):
-      return u",".join([u"%s"%r[i] for i in self.order])
+      return [u"%s"%r[i] for i in self.order]
 
-    return u"%s\n"%"\n".join([line(r) for r in self.get_records()])  
+    for r in self.get_records():
+      w.writerow(line(r))
+
